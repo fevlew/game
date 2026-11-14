@@ -65,12 +65,14 @@
       this.sway = 0;
 
       /* фонарь */
-      this.flash = new THREE.SpotLight(0xfff0d0, 0, 32, 0.46, 0.38, 1.5);
+      this.flash = new THREE.SpotLight(0xfff0d0, 0, 30, 0.56, 0.78, 1.35);
       this.flash.castShadow = true;
       this.flash.shadow.mapSize.set(1024, 1024);
-      this.flash.shadow.camera.near = 0.2;
-      this.flash.shadow.camera.far = 26;
-      this.flash.shadow.bias = -0.0012;
+      this.flash.shadow.camera.near = 0.3;
+      this.flash.shadow.camera.far = 24;
+      /* без normalBias пятно фонаря покрывается «акне» теней */
+      this.flash.shadow.bias = -0.0004;
+      this.flash.shadow.normalBias = 0.035;
       this.flashTarget = new THREE.Object3D();
       game.scene.add(this.flash, this.flashTarget);
       this.flash.target = this.flashTarget;
@@ -208,30 +210,40 @@
 
     _resolve(axis, d) {
       const world = this.world;
+      const CELL = global.HG.CELL;
+      const R = RADIUS;
       const gx = world.toGridX(this.pos.x), gy = world.toGridY(this.pos.z);
+
+      const push = (minX, maxX, minZ, maxZ) => {
+        const px = this.pos.x, pz = this.pos.z;   // всегда актуальные координаты
+        if (!(px + R > minX && px - R < maxX && pz + R > minZ && pz - R < maxZ)) return;
+        if (axis === 'x') {
+          if (d > 0) this.pos.x = minX - R;
+          else if (d < 0) this.pos.x = maxX + R;
+          else this.pos.x = (px - minX < maxX - px) ? minX - R : maxX + R;
+          this.vel.x = 0;
+        } else {
+          if (d > 0) this.pos.z = minZ - R;
+          else if (d < 0) this.pos.z = maxZ + R;
+          else this.pos.z = (pz - minZ < maxZ - pz) ? minZ - R : maxZ + R;
+          this.vel.z = 0;
+        }
+      };
+
+      /* стены и закрытые двери — по клеткам, границы ровно по сетке */
       for (let y = gy - 1; y <= gy + 1; y++) {
         for (let x = gx - 1; x <= gx + 1; x++) {
-          if (x < 0 || y < 0 || x >= world.gridW || y >= world.gridH) continue;
-          const i = world.idx(x, y);
-          const solid = world.solid[i] === 1 || world.blocked[i] === 1;
-          if (!solid) continue;
-          const minX = x * global.HG.CELL - global.HG.CELL / 2;
-          const minZ = y * global.HG.CELL - global.HG.CELL / 2;
-          const maxX = minX + 2.4, maxZ = minZ + 2.4;
-          const px = this.pos.x, pz = this.pos.z;
-          const overlapX = px + RADIUS > minX && px - RADIUS < maxX;
-          const overlapZ = pz + RADIUS > minZ && pz - RADIUS < maxZ;
-          if (!overlapX || !overlapZ) continue;
-          if (axis === 'x') {
-            if (d > 0) this.pos.x = minX - RADIUS;
-            else if (d < 0) this.pos.x = maxX + RADIUS;
-            this.vel.x = 0;
-          } else {
-            if (d > 0) this.pos.z = minZ - RADIUS;
-            else if (d < 0) this.pos.z = maxZ + RADIUS;
-            this.vel.z = 0;
-          }
+          if (!world.blocksPlayerCell(x, y)) continue;
+          push(x * CELL, (x + 1) * CELL, y * CELL, (y + 1) * CELL);
         }
+      }
+
+      /* мебель — по её реальным габаритам */
+      const boxes = world.propBoxes;
+      for (let i = 0; i < boxes.length; i++) {
+        const b = boxes[i];
+        if (Math.abs(b.y - this.pos.y) > 1.6) continue;   // другой этаж
+        push(b.minX, b.maxX, b.minZ, b.maxZ);
       }
     }
 
@@ -292,7 +304,7 @@
         this.battery = Math.max(0, this.battery - dt * 1.35);
         if (this.battery <= 0) this.flashlightOn = false;
       }
-      const target = this.flashlightOn ? 72 : 0;
+      const target = this.flashlightOn ? 44 : 0;
       this.flash.intensity = U.damp(this.flash.intensity, target, 6, dt);
       this.spill.intensity = U.damp(this.spill.intensity, this.flashlightOn ? 2.2 : 0, 6, dt);
       /* мерцание на низком заряде */

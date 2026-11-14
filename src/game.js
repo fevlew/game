@@ -74,6 +74,8 @@
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
       this.renderer.setSize(window.innerWidth, window.innerHeight);
       this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+      this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      this.renderer.toneMappingExposure = 1.12;
       this.renderer.shadowMap.enabled = true;
       this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -84,9 +86,10 @@
       this.camera = new THREE.PerspectiveCamera(this.settings.fov, window.innerWidth / window.innerHeight, 0.06, 90);
       this.scene.add(this.camera);
 
-      this.ambient = new THREE.AmbientLight(0x28374e, 0.62);
+      /* «лунный» заполняющий свет: тьма остаётся, но дом читается */
+      this.ambient = new THREE.AmbientLight(0x93a1bb, 2.9);
       this.scene.add(this.ambient);
-      this.hemi = new THREE.HemisphereLight(0x33405a, 0x090a0d, 0.35);
+      this.hemi = new THREE.HemisphereLight(0xa7b6d2, 0x2a231a, 1.25);
       this.scene.add(this.hemi);
 
       /* пул динамических источников света */
@@ -112,15 +115,15 @@
       if (q === 'low') {
         this.renderer.setPixelRatio(0.75);
         this.renderer.shadowMap.enabled = false;
-        this.scene.fog.density = 0.062;
+        this.scene.fog.density = 0.05;
       } else if (q === 'medium') {
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.25));
         this.renderer.shadowMap.enabled = false;
-        this.scene.fog.density = 0.05;
+        this.scene.fog.density = 0.04;
       } else {
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
         this.renderer.shadowMap.enabled = true;
-        this.scene.fog.density = 0.042;
+        this.scene.fog.density = 0.032;
       }
       if (this.player) {
         this.player.flash.castShadow = this.renderer.shadowMap.enabled;
@@ -181,8 +184,12 @@
       });
       window.addEventListener('mousemove', (e) => {
         if (document.pointerLockElement !== canvas) return;
-        this.input.mouseDX += e.movementX || 0;
-        this.input.mouseDY += e.movementY || 0;
+        /* при захвате курсора браузер иногда присылает один огромный сдвиг —
+           без ограничения камера прыгает в сторону */
+        const mx = U.clamp(e.movementX || 0, -160, 160);
+        const my = U.clamp(e.movementY || 0, -160, 160);
+        this.input.mouseDX += mx;
+        this.input.mouseDY += my;
       });
       canvas.addEventListener('mousedown', (e) => {
         if (this.state !== 'playing' || this.modalOpen) return;
@@ -811,7 +818,7 @@
           pl.color.setHex(l.color);
           pl.distance = l.distance;
           const flick = l.current !== undefined ? l.current : l.intensity;
-          pl.intensity = flick * 16;
+          pl.intensity = flick * 34;
         } else {
           pl.intensity = 0;
         }

@@ -180,9 +180,10 @@
           if (x < 0 || y < 0 || x >= world.gridW || y >= world.gridH) continue;
           const i = world.idx(x, y);
           if (world.solid[i] !== 1 && world.blocked[i] !== 1) continue;
-          const minX = x * global.HG.CELL - global.HG.CELL / 2;
-          const minZ = y * global.HG.CELL - global.HG.CELL / 2;
-          const maxX = minX + global.HG.CELL, maxZ = minZ + global.HG.CELL;
+          /* границы клетки строго по сетке — иначе хитбоксы съезжают на полклетки */
+          const CELL = global.HG.CELL;
+          const minX = x * CELL, minZ = y * CELL;
+          const maxX = minX + CELL, maxZ = minZ + CELL;
           const px = this.pos.x, pz = this.pos.z;
           if (!(px + this.radius > minX && px - this.radius < maxX &&
                 pz + this.radius > minZ && pz - this.radius < maxZ)) continue;
@@ -225,6 +226,9 @@
       this.animPhase += dt;
       this.alert = Math.max(0, this.alert - dt * 0.12);
       this.repathTimer -= dt;
+
+      /* закрытая дверь на пути: открываем её (у каждого своя скорость) */
+      this.handleDoors(dt);
 
       this.think(dt);
       this.act(dt);
@@ -335,54 +339,96 @@
 
     buildModel() {
       const g = new THREE.Group();
-      const skin = new THREE.MeshPhongMaterial({ color: 0xbaa78e, shininess: 4 });
-      const dress = new THREE.MeshPhongMaterial({ color: 0x4a3742, shininess: 6 });
-      const hair = new THREE.MeshPhongMaterial({ color: 0xc9c9bf, shininess: 2 });
-      const dark = new THREE.MeshPhongMaterial({ color: 0x241c1c, shininess: 2 });
-      const eyeMat = new THREE.MeshBasicMaterial({ color: 0xff2a12 });
+      const skin = new THREE.MeshPhongMaterial({ color: 0xa4927c, shininess: 7 });
+      const dress = new THREE.MeshPhongMaterial({ color: 0x3a2c38, shininess: 5 });
+      const dress2 = new THREE.MeshPhongMaterial({ color: 0x241a24, shininess: 4 });
+      const apron = new THREE.MeshPhongMaterial({ color: 0x776d5f, shininess: 4 });
+      const hairM = new THREE.MeshPhongMaterial({ color: 0xb7b5aa, shininess: 2 });
+      const dark = new THREE.MeshBasicMaterial({ color: 0x140d0d });
+      const white = new THREE.MeshBasicMaterial({ color: 0xd8d3c5 });
 
-      const mb = new MB();
-      mb.cone(0.40, 1.45, 0, 0.72, 0, 0x4a3742);
-      mb.box(0.46, 0.46, 0.3, 0, 1.48, 0.02, 0x4a3742);
-      mb.box(0.5, 0.16, 0.34, 0, 1.72, 0.02, 0x2f232b);
-      const body = mb.build(dress);
+      /* юбка-колокол */
+      const mbSkirt = new MB();
+      mbSkirt.cone(0.19, 1.42, 0, 0.73, 0, 0, 18);
       const bodyPivot = new THREE.Group();
-      bodyPivot.rotation.x = 0.14;
-      bodyPivot.add(body);
+      bodyPivot.rotation.x = 0.13;
+      bodyPivot.add(mbSkirt.build(dress));
+      const mbHem = new MB();
+      mbHem.cyl(0.392, 0.09, 0, 0.06, 0, 0, 18);
+      bodyPivot.add(mbHem.build(dress2));
       g.add(bodyPivot);
 
-      const mbh = new MB();
-      mbh.sphere(0.23, 0, 0, 0, 0xbaa78e, 12);
-      mbh.sphere(0.245, 0, 0.03, -0.05, 0xc9c9bf, 12);
-      const head = mbh.build(skin);
+      /* корпус и фартук */
+      const mbTorso = new MB();
+      mbTorso.box(0.42, 0.5, 0.27, 0, 1.46, 0, 0);
+      bodyPivot.add(mbTorso.build(dress));
+      const mbCollar = new MB();
+      mbCollar.box(0.48, 0.11, 0.33, 0, 1.73, 0.005, 0);
+      bodyPivot.add(mbCollar.build(dress2));
+      const mbApron = new MB();
+      mbApron.box(0.32, 0.28, 0.05, 0, 0.28, 0.335, 0);
+      mbApron.box(0.3, 0.28, 0.05, 0, 0.54, 0.305, 0);
+      mbApron.box(0.28, 0.28, 0.05, 0, 0.8, 0.275, 0);
+      mbApron.box(0.25, 0.3, 0.05, 0, 1.08, 0.245, 0);
+      bodyPivot.add(mbApron.build(apron));
+
+      /* голова */
+      const mbHead = new MB();
+      mbHead.sphere(0.185, 0, 0, 0, 0, 16);
+      mbHead.box(0.22, 0.14, 0.2, 0, -0.125, 0.02, 0);
+      mbHead.box(0.06, 0.085, 0.07, 0, -0.02, 0.19, 0);
+      mbHead.sphere(0.05, -0.195, -0.01, -0.01, 0, 8);
+      mbHead.sphere(0.05, 0.195, -0.01, -0.01, 0, 8);
+      const head = mbHead.build(skin);
       const headPivot = new THREE.Group();
-      headPivot.position.set(0, 1.86, 0.04);
+      headPivot.position.set(0, 1.84, 0.03);
       headPivot.add(head);
       g.add(headPivot);
 
-      const mbe = new MB();
-      mbe.sphere(0.04, -0.085, 0.02, 0.195, 0xffffff, 6);
-      mbe.sphere(0.04, 0.085, 0.02, 0.195, 0xffffff, 6);
-      const eyes = mbe.build(eyeMat);
-      headPivot.add(eyes);
+      /* седые волосы: шапка, виски, узел */
+      const mbHair = new MB();
+      mbHair.sphere(0.198, 0, 0.045, -0.02, 0, 16);
+      mbHair.sphere(0.1, 0, 0.16, -0.08, 0, 10);
+      mbHair.sphere(0.095, -0.13, 0.06, -0.12, 0, 10);
+      mbHair.sphere(0.095, 0.13, 0.06, -0.12, 0, 10);
+      mbHair.sphere(0.085, 0, 0.13, -0.24, 0, 10);
+      headPivot.add(mbHair.build(hairM));
 
-      /* руки */
-      const armGeo = (side) => {
-        const m = new MB();
-        m.cyl(0.075, 0.95, 0, -0.47, 0, 0xbaa78e, 8);
-        m.sphere(0.085, 0, -0.95, 0, 0xbaa78e, 8);
-        return m.build(skin);
+      /* лицо */
+      const mbEye = new MB();
+      mbEye.sphere(0.045, -0.075, 0.02, 0.165, 0, 10);
+      mbEye.sphere(0.045, 0.075, 0.02, 0.165, 0, 10);
+      headPivot.add(mbEye.build(white));
+      const mbPup = new MB();
+      mbPup.sphere(0.021, -0.078, 0.02, 0.196, 0, 8);
+      mbPup.sphere(0.021, 0.078, 0.02, 0.196, 0, 8);
+      headPivot.add(mbPup.build(dark));
+      const mbMouth = new MB();
+      mbMouth.box(0.1, 0.022, 0.02, 0, -0.14, 0.185, 0);
+      headPivot.add(mbMouth.build(dark));
+
+      /* руки: рукав + предплечье + кисть */
+      const mkArm = (side) => {
+        const root = new THREE.Group();
+        root.position.set(0.33 * side, 1.66, 0.02);
+        const tilt = new THREE.Group();
+        tilt.rotation.z = -0.2 * side;
+        const sl = new MB(); sl.cyl(0.08, 0.34, 0, -0.17, 0, 0, 10);
+        const fa = new MB(); fa.cyl(0.055, 0.52, 0, -0.58, 0, 0, 10);
+        const hd = new MB(); hd.sphere(0.078, 0, -0.86, 0, 0, 10);
+        tilt.add(sl.build(dress), fa.build(skin), hd.build(skin));
+        root.add(tilt);
+        return root;
       };
-      const armL = new THREE.Group(); armL.position.set(-0.44, 1.6, 0.03); armL.add(armGeo(-1));
-      const armR = new THREE.Group(); armR.position.set(0.44, 1.6, 0.03); armR.add(armGeo(1));
+      const armL = mkArm(-1), armR = mkArm(1);
       g.add(armL, armR);
 
       /* бита */
       const mbb = new MB();
-      mbb.cyl(0.055, 0.85, 0, -0.35, 0, 0x6b4a2c, 8);
-      mbb.cyl(0.085, 0.3, 0, -0.82, 0, 0x5a3d24, 8);
-      const bat = mbb.build(new THREE.MeshPhongMaterial({ color: 0x6b4a2c }));
-      bat.position.set(0, -0.95, 0.02);
+      mbb.cyl(0.048, 0.78, 0, -0.34, 0.05, 0, 10);
+      mbb.cyl(0.082, 0.34, 0, -0.86, 0.05, 0, 10);
+      const bat = mbb.build(new THREE.MeshPhongMaterial({ color: 0x6b4a2c, shininess: 12 }));
+      bat.position.set(0, -0.7, 0.05);
       armR.add(bat);
 
       this.group.add(g);
@@ -559,42 +605,63 @@
 
     buildModel() {
       const g = new THREE.Group();
-      const suit = new THREE.MeshPhongMaterial({ color: 0x0a0a0c, shininess: 2 });
+      const suit = new THREE.MeshPhongMaterial({ color: 0x15151b, shininess: 4 });
       const headMat = new THREE.MeshBasicMaterial({ color: 0xe6e6e6 });
       const black = new THREE.MeshBasicMaterial({ color: 0x05050a });
+      const tieMat = new THREE.MeshPhongMaterial({ color: 0x6d1018, shininess: 6 });
 
+      /* узкое пальто-силуэт */
       const mb = new MB();
-      mb.cone(0.21, 2.35, 0, 1.16, 0, 0x0a0a0c);
-      mb.box(0.52, 0.2, 0.26, 0, 2.3, 0, 0x0a0a0c);
-      mb.box(0.12, 0.46, 0.05, 0, 1.98, 0.16, 0x6a1010);
+      mb.cone(0.115, 2.32, 0, 1.16, 0, 0, 18);
+      mb.box(0.42, 0.16, 0.2, 0, 2.31, 0, 0);
+      mb.cyl(0.14, 0.1, 0, 2.02, 0, 0, 12);
       const body = mb.build(suit);
       const bodyPivot = new THREE.Group();
       bodyPivot.add(body);
       g.add(bodyPivot);
 
+      /* галстук */
+      const mbc = new MB();
+      mbc.box(0.19, 0.14, 0.16, 0, 2.22, 0.015, 0);
+      bodyPivot.add(mbc.build(new THREE.MeshPhongMaterial({ color: 0xcac6bb, shininess: 6 })));
+      const mbt = new MB();
+      mbt.box(0.075, 0.5, 0.03, 0, 1.98, 0.115, 0);
+      mbt.box(0.11, 0.09, 0.035, 0, 2.26, 0.11, 0);
+      bodyPivot.add(mbt.build(tieMat));
+
+      /* голова */
       const mbh = new MB();
-      mbh.sphere(0.21, 0, 0, 0, 0xffffff, 14);
+      mbh.sphere(0.185, 0, 0, 0, 0, 16);
+      mbh.box(0.2, 0.16, 0.19, 0, -0.16, 0, 0);
+      mbh.cyl(0.055, 0.16, 0, -0.14, 0, 0, 10);
       const head = mbh.build(headMat);
       const headPivot = new THREE.Group();
-      headPivot.position.set(0, 2.56, 0);
+      headPivot.position.set(0, 2.53, 0);
       headPivot.add(head);
       g.add(headPivot);
 
+      /* пустые глазницы — никакой улыбки */
       const mbe = new MB();
-      mbe.sphere(0.05, -0.08, 0.03, 0.19, 0x000000, 8);
-      mbe.sphere(0.05, 0.08, 0.03, 0.19, 0x000000, 8);
-      mbe.box(0.16, 0.03, 0.02, 0, -0.09, 0.19, 0x000000);
+      mbe.sphere(0.052, -0.075, 0.025, 0.155, 0, 10);
+      mbe.sphere(0.052, 0.075, 0.025, 0.155, 0, 10);
+      mbe.sphere(0.026, -0.075, 0.02, 0.195, 0, 8);
+      mbe.sphere(0.026, 0.075, 0.02, 0.195, 0, 8);
       headPivot.add(mbe.build(black));
 
       /* длинные руки */
-      const armGeo = () => {
+      const mkArm = (side) => {
+        const root = new THREE.Group();
+        root.position.set(0.235 * side, 2.24, 0);
+        const tilt = new THREE.Group();
+        tilt.rotation.z = -0.05 * side;
         const m = new MB();
-        m.cyl(0.05, 1.7, 0, -0.85, 0, 0x0a0a0c, 8);
-        m.sphere(0.055, 0, -1.7, 0, 0x0a0a0c, 8);
-        return m.build(suit);
+        m.cyl(0.047, 1.68, 0, -0.84, 0, 0, 8);
+        m.sphere(0.06, 0, -1.68, 0, 0, 8);
+        tilt.add(m.build(suit));
+        root.add(tilt);
+        return root;
       };
-      const armL = new THREE.Group(); armL.position.set(-0.3, 2.26, 0); armL.add(armGeo());
-      const armR = new THREE.Group(); armR.position.set(0.3, 2.26, 0); armR.add(armGeo());
+      const armL = mkArm(-1), armR = mkArm(1);
       g.add(armL, armR);
 
       this.group.add(g);
@@ -741,55 +808,104 @@
 
     buildModel() {
       const g = new THREE.Group();
-      const flesh = new THREE.MeshPhongMaterial({ color: 0x8a6a5a, shininess: 3 });
-      const apron = new THREE.MeshPhongMaterial({ color: 0x7a2b24, shininess: 2 });
-      const steel = new THREE.MeshPhongMaterial({ color: 0x9a9a96, shininess: 40 });
-      const dark = new THREE.MeshPhongMaterial({ color: 0x1a1414, shininess: 2 });
+      const flesh = new THREE.MeshPhongMaterial({ color: 0x9a7b66, shininess: 6 });
+      const apronM = new THREE.MeshPhongMaterial({ color: 0x7d2b23, shininess: 4 });
+      const cloth = new THREE.MeshPhongMaterial({ color: 0x2b2724, shininess: 3 });
+      const steel = new THREE.MeshPhongMaterial({ color: 0xa6a69f, shininess: 48 });
+      const hairM = new THREE.MeshPhongMaterial({ color: 0x191211, shininess: 2 });
+      const dark = new THREE.MeshBasicMaterial({ color: 0x0d0a09 });
+      const white = new THREE.MeshBasicMaterial({ color: 0xdcd6c8 });
+      const red = new THREE.MeshBasicMaterial({ color: 0x6d1512 });
 
-      const mb = new MB();
-      mb.box(1.0, 1.15, 0.62, 0, 1.5, 0, 0x8a6a5a);
-      mb.box(0.92, 1.0, 0.12, 0, 1.42, 0.34, 0x7a2b24);
-      mb.box(1.12, 0.3, 0.7, 0, 2.1, 0, 0x8a6a5a);
-      const body = mb.build(flesh);
       const bodyPivot = new THREE.Group();
-      bodyPivot.add(body);
       g.add(bodyPivot);
 
-      const mbh = new MB();
-      mbh.sphere(0.26, 0, 0, 0, 0x8a6a5a, 12);
-      mbh.box(0.5, 0.12, 0.5, 0, 0.03, 0, 0x15100f);
-      const head = mbh.build(dark);
+      /* массивный торс */
+      const mbT = new MB();
+      mbT.box(0.84, 1.04, 0.5, 0, 1.62, 0, 0);
+      mbT.box(0.92, 0.2, 0.54, 0, 2.12, 0, 0);
+      mbT.cyl(0.1, 0.22, 0, 2.3, 0, 0, 10);
+      bodyPivot.add(mbT.build(flesh));
+
+      /* фартук и ремень */
+      const mbA = new MB();
+      mbA.box(0.6, 0.84, 0.06, 0, 1.52, 0.27, 0);
+      bodyPivot.add(mbA.build(apronM));
+      const mbBelt = new MB();
+      mbBelt.box(0.88, 0.13, 0.54, 0, 1.14, 0, 0);
+      bodyPivot.add(mbBelt.build(cloth));
+
+      /* голова */
+      const mbH = new MB();
+      mbH.sphere(0.235, 0, 0, 0, 0, 14);
+      mbH.box(0.28, 0.16, 0.24, 0, -0.15, 0.02, 0);
+      mbH.box(0.05, 0.09, 0.08, 0, -0.02, 0.23, 0);
+      const head = mbH.build(flesh);
       const headPivot = new THREE.Group();
-      headPivot.position.set(0, 2.32, 0);
+      headPivot.position.set(0, 2.48, 0);
       headPivot.add(head);
       g.add(headPivot);
 
-      const armGeo = () => {
+      const mbHair = new MB();
+      mbHair.box(0.44, 0.15, 0.42, 0, 0.13, -0.01, 0);
+      mbHair.box(0.42, 0.24, 0.13, 0, -0.02, -0.2, 0);
+      headPivot.add(mbHair.build(hairM));
+
+      const mbEye = new MB();
+      mbEye.box(0.085, 0.035, 0.03, -0.09, 0.03, 0.225, 0);
+      mbEye.box(0.085, 0.035, 0.03, 0.09, 0.03, 0.225, 0);
+      headPivot.add(mbEye.build(white));
+      const mbPup = new MB();
+      mbPup.box(0.026, 0.035, 0.02, -0.09, 0.03, 0.24, 0);
+      mbPup.box(0.026, 0.035, 0.02, 0.09, 0.03, 0.24, 0);
+      headPivot.add(mbPup.build(dark));
+      const mbBrow = new MB();
+      mbBrow.box(0.11, 0.03, 0.025, -0.09, 0.095, 0.225, 0);
+      mbBrow.box(0.11, 0.03, 0.025, 0.09, 0.095, 0.225, 0);
+      headPivot.add(mbBrow.build(hairM));
+      const mbMouth = new MB();
+      mbMouth.box(0.16, 0.035, 0.025, 0, -0.13, 0.215, 0);
+      headPivot.add(mbMouth.build(red));
+
+      /* руки */
+      const mkArm = (side) => {
+        const root = new THREE.Group();
+        root.position.set(0.52 * side, 2.06, 0);
+        const tilt = new THREE.Group();
+        tilt.rotation.z = -0.12 * side;
         const m = new MB();
-        m.cyl(0.13, 0.95, 0, -0.47, 0, 0x8a6a5a, 8);
-        m.sphere(0.15, 0, -0.95, 0, 0x8a6a5a, 8);
-        return m.build(flesh);
+        m.cyl(0.13, 0.72, 0, -0.36, 0, 0, 10);
+        tilt.add(m.build(flesh));
+        const h = new MB();
+        h.sphere(0.14, 0, -0.78, 0, 0, 10);
+        tilt.add(h.build(flesh));
+        root.add(tilt);
+        return root;
       };
-      const armL = new THREE.Group(); armL.position.set(-0.58, 1.95, 0); armL.add(armGeo());
-      const armR = new THREE.Group(); armR.position.set(0.58, 1.95, 0); armR.add(armGeo());
+      const armL = mkArm(-1), armR = mkArm(1);
       g.add(armL, armR);
 
       /* тесак */
       const mbc = new MB();
-      mbc.box(0.36, 0.42, 0.04, 0, -0.32, 0.08, 0x9a9a96);
-      mbc.box(0.1, 0.3, 0.08, 0, -0.05, 0.02, 0x4a3a2a);
+      mbc.box(0.34, 0.4, 0.035, 0, -0.28, 0.06, 0);
+      mbc.box(0.09, 0.28, 0.07, 0, -0.02, 0.02, 0);
       const cleaver = mbc.build(steel);
-      cleaver.position.set(0, -0.95, 0.1);
+      cleaver.position.set(0, -0.8, 0.1);
       armR.add(cleaver);
 
       /* ноги */
-      const legGeo = () => {
+      const mkLeg = (side) => {
+        const root = new THREE.Group();
+        root.position.set(0.24 * side, 1.06, 0);
         const m = new MB();
-        m.cyl(0.17, 1.0, 0, -0.5, 0, 0x4a3a30, 8);
-        return m.build(dark);
+        m.cyl(0.16, 1.06, 0, -0.53, 0, 0, 10);
+        root.add(m.build(cloth));
+        const b = new MB();
+        b.box(0.26, 0.18, 0.36, 0, -1.0, 0.05, 0);
+        root.add(b.build(dark));
+        return root;
       };
-      const legL = new THREE.Group(); legL.position.set(-0.26, 1.0, 0); legL.add(legGeo());
-      const legR = new THREE.Group(); legR.position.set(0.26, 1.0, 0); legR.add(legGeo());
+      const legL = mkLeg(-1), legR = mkLeg(1);
       g.add(legL, legR);
 
       this.group.add(g);
@@ -915,51 +1031,82 @@
 
     buildModel() {
       const g = new THREE.Group();
-      const pale = new THREE.MeshPhongMaterial({ color: 0xd9d2c6, shininess: 8 });
-      const dark = new THREE.MeshBasicMaterial({ color: 0x120e10 });
+      const pale = new THREE.MeshPhongMaterial({ color: 0xdad3c7, shininess: 12 });
+      const dressM = new THREE.MeshPhongMaterial({ color: 0x8d8478, shininess: 4 });
+      const hairM = new THREE.MeshPhongMaterial({ color: 0x2a2320, shininess: 5 });
+      const dark = new THREE.MeshBasicMaterial({ color: 0x0b0809 });
       const red = new THREE.MeshBasicMaterial({ color: 0x8a1220 });
 
-      const mb = new MB();
-      mb.box(0.38, 0.55, 0.26, 0, 0.42, 0, 0xd9d2c6);
-      mb.box(0.3, 0.3, 0.22, 0, 0.85, 0, 0xc9c0b2);
-      const body = mb.build(pale);
       const bodyPivot = new THREE.Group();
-      bodyPivot.add(body);
       g.add(bodyPivot);
 
-      const mbh = new MB();
-      mbh.sphere(0.19, 0, 0, 0, 0xe4ddd1, 14);
-      const head = mbh.build(pale);
+      /* платье-колокол и корпус */
+      const mbD = new MB();
+      mbD.cone(0.17, 0.56, 0, 0.3, 0, 0, 14);
+      bodyPivot.add(mbD.build(dressM));
+      const mbT = new MB();
+      mbT.box(0.32, 0.42, 0.21, 0, 0.62, 0, 0);
+      mbT.box(0.34, 0.08, 0.23, 0, 0.84, 0, 0);
+      bodyPivot.add(mbT.build(pale));
+
+      /* голова */
+      const mbH = new MB();
+      mbH.sphere(0.17, 0, 0, 0, 0, 14);
+      mbH.box(0.2, 0.12, 0.17, 0, -0.11, 0.01, 0);
+      const head = mbH.build(pale);
       const headPivot = new THREE.Group();
       headPivot.position.set(0, 1.02, 0);
       headPivot.add(head);
       g.add(headPivot);
 
-      const mbe = new MB();
-      mbe.sphere(0.035, -0.07, 0.02, 0.16, 0x000000, 6);
-      mbe.sphere(0.035, 0.07, 0.02, 0.16, 0x000000, 6);
-      headPivot.add(mbe.build(dark));
-      const mbm = new MB();
-      mbm.box(0.1, 0.04, 0.02, 0, -0.09, 0.17, 0x8a1220);
-      headPivot.add(mbm.build(red));
+      const mbHair = new MB();
+      mbHair.box(0.3, 0.11, 0.28, 0, 0.13, -0.01, 0);
+      mbHair.box(0.3, 0.22, 0.09, 0, 0.0, -0.16, 0);
+      mbHair.box(0.07, 0.2, 0.24, -0.17, 0.02, -0.02, 0);
+      mbHair.box(0.07, 0.2, 0.24, 0.17, 0.02, -0.02, 0);
+      headPivot.add(mbHair.build(hairM));
 
-      const armGeo = () => {
+      /* пустые глазницы с красным огоньком */
+      const mbS = new MB();
+      mbS.sphere(0.055, -0.062, 0.02, 0.135, 0, 10);
+      mbS.sphere(0.055, 0.062, 0.02, 0.135, 0, 10);
+      headPivot.add(mbS.build(dark));
+      const mbR = new MB();
+      mbR.sphere(0.021, -0.062, 0.02, 0.168, 0, 8);
+      mbR.sphere(0.021, 0.062, 0.02, 0.168, 0, 8);
+      headPivot.add(mbR.build(red));
+      const mbM = new MB();
+      mbM.box(0.075, 0.022, 0.02, 0, -0.09, 0.15, 0);
+      headPivot.add(mbM.build(red));
+
+      /* руки с шарнирами */
+      const mkArm = (side) => {
+        const root = new THREE.Group();
+        root.position.set(0.19 * side, 0.82, 0.02);
+        const tilt = new THREE.Group();
+        tilt.rotation.z = -0.08 * side;
         const m = new MB();
-        m.cyl(0.04, 0.62, 0, -0.31, 0, 0xd9d2c6, 6);
-        m.sphere(0.05, 0, -0.62, 0, 0xd9d2c6, 6);
-        return m.build(pale);
+        m.sphere(0.045, 0, 0, 0, 0, 8);
+        m.cyl(0.042, 0.5, 0, -0.26, 0, 0, 8);
+        m.sphere(0.055, 0, -0.53, 0, 0, 8);
+        tilt.add(m.build(pale));
+        root.add(tilt);
+        return root;
       };
-      const armL = new THREE.Group(); armL.position.set(-0.26, 0.6, 0.05); armL.add(armGeo());
-      const armR = new THREE.Group(); armR.position.set(0.26, 0.6, 0.05); armR.add(armGeo());
+      const armL = mkArm(-1), armR = mkArm(1);
       g.add(armL, armR);
 
-      const legGeo = () => {
+      /* ноги */
+      const mkLeg = (side) => {
+        const root = new THREE.Group();
+        root.position.set(0.09 * side, 0.32, 0);
         const m = new MB();
-        m.cyl(0.05, 0.4, 0, -0.2, 0, 0xc9c0b2, 6);
-        return m.build(pale);
+        m.cyl(0.05, 0.32, 0, -0.16, 0, 0, 8);
+        m.box(0.1, 0.06, 0.18, 0, -0.33, 0.03, 0);
+        root.add(m.build(pale));
+        return root;
       };
-      const legL = new THREE.Group(); legL.position.set(-0.11, 0.35, 0); legL.add(legGeo());
-      const legR = new THREE.Group(); legR.position.set(0.11, 0.35, 0); legR.add(legGeo());
+      const legL = mkLeg(-1), legR = mkLeg(1);
       g.add(legL, legR);
 
       this.group.add(g);

@@ -96,14 +96,25 @@
       for (const [x, z] of [[-0.22, -0.22], [0.22, -0.22], [-0.22, 0.22], [0.22, 0.22]]) mb.box(0.07, 0.44, 0.07, x, 0.22, z, 0x3d2d20);
     } },
     sofa: { fw: 3, fh: 1, build(mb) {
-      mb.box(2.3, 0.45, 0.95, 0, 0.4, 0, 0x4a3a3a);
-      mb.box(2.3, 0.75, 0.22, 0, 0.85, -0.4, 0x3e3030);
-      mb.box(0.22, 0.62, 0.95, -1.05, 0.72, 0, 0x3e3030);
-      mb.box(0.22, 0.62, 0.95, 1.05, 0.72, 0, 0x3e3030);
+      /* каркас */
+      mb.box(2.34, 0.36, 0.96, 0, 0.28, 0, 0x2b2323);
+      mb.box(2.34, 0.78, 0.2, 0, 0.72, -0.42, 0x2a2222);
+      mb.box(0.24, 0.6, 0.96, -1.05, 0.58, 0, 0x2a2222);
+      mb.box(0.24, 0.6, 0.96, 1.05, 0.58, 0, 0x2a2222);
+      /* подушки сиденья */
+      for (let i = -1; i <= 1; i++) mb.box(0.66, 0.16, 0.78, i * 0.7, 0.53, 0.06, 0x3d3131);
+      /* спинка */
+      mb.box(2.1, 0.5, 0.16, 0, 0.72, -0.29, 0x382d2d);
+      /* ножки */
+      for (const [x, z] of [[-1.02, -0.36], [1.02, -0.36], [-1.02, 0.36], [1.02, 0.36]]) mb.box(0.1, 0.12, 0.1, x, 0.06, z, 0x1e1717);
     } },
     armchair: { fw: 1, fh: 1, build(mb) {
-      mb.box(0.9, 0.4, 0.85, 0, 0.36, 0, 0x4a3a3a);
-      mb.box(0.9, 0.8, 0.2, 0, 0.78, -0.33, 0x3e3030);
+      mb.box(0.84, 0.34, 0.82, 0, 0.26, 0, 0x2b2323);
+      mb.box(0.72, 0.16, 0.7, 0, 0.5, 0.04, 0x3d3131);
+      mb.box(0.84, 0.62, 0.16, 0, 0.62, -0.33, 0x382d2d);
+      mb.box(0.14, 0.46, 0.82, -0.37, 0.5, 0, 0x2a2222);
+      mb.box(0.14, 0.46, 0.82, 0.37, 0.5, 0, 0x2a2222);
+      for (const [x, z] of [[-0.34, -0.32], [0.34, -0.32], [-0.34, 0.32], [0.34, 0.32]]) mb.box(0.08, 0.1, 0.08, x, 0.05, z, 0x1e1717);
     } },
     tv: { fw: 1, fh: 1, build(mb) {
       mb.box(0.5, 0.5, 0.45, 0, 0.25, 0, 0x2a2523);
@@ -213,16 +224,28 @@
       mb.box(0.3, 0.05, 0.24, 0.04, 0.08, 0.02, 0xe0dac7);
     } },
     pipes: { fw: 3, fh: 1, build(mb) {
-      for (let i = 0; i < 3; i++) mb.cyl(0.11, 6.5, -0.5 + i * 0.5, 2.9, 0, 0x55524b, 10);
-      mb.box(0.2, 0.2, 0.2, 0, 2.9, 0, 0x3d3a34);
+      /* трубы идут вдоль стены под потолком подвала, ничего не протыкая */
+      for (let i = 0; i < 3; i++) {
+        const y = 2.12 - i * 0.3;
+        mb.box(5.6, 0.16, 0.16, 0, y, 0, 0x55524b);
+        for (const x of [-2.2, 0, 2.2]) mb.box(0.22, 0.24, 0.24, x, y, 0, 0x3d3a34);
+      }
+      for (const x of [-2.6, 2.6]) mb.box(0.14, 1.0, 0.14, x, 1.6, 0, 0x3a3731);
     } },
     rug: { fw: 3, fh: 3, noBlock: true, build(mb) {
-      mb.box(2.4, 0.03, 3.0, 0, 0.02, 0, 0x5c2f2a);
-      mb.box(2.0, 0.04, 2.6, 0, 0.03, 0, 0x6e3a33);
+      mb.box(2.4, 0.03, 3.0, 0, 0.015, 0, 0x3a2422);
+      mb.box(2.16, 0.035, 2.76, 0, 0.022, 0, 0x4a2b26);
+      mb.box(1.84, 0.04, 2.44, 0, 0.028, 0, 0x56322b);
+      mb.box(2.44, 0.02, 0.16, 0, 0.03, 1.44, 0x2e1c1a);
+      mb.box(2.44, 0.02, 0.16, 0, 0.03, -1.44, 0x2e1c1a);
     } },
     lamp: { fw: 1, fh: 1, noBlock: true, build(mb) {
-      mb.cyl(0.06, 1.5, 0, 0.75, 0, 0x4a4640, 8);
-      mb.cyl(0.22, 0.3, 0, 1.6, 0, 0x6b6256, 12);
+      mb.cyl(0.21, 0.05, 0, 0.025, 0, 0x2e2a25, 12);
+      mb.cyl(0.032, 1.42, 0, 0.72, 0, 0x4a4640, 8);
+      mb.cyl(0.055, 0.07, 0, 1.43, 0, 0x5a544a, 10);
+      mb.cone(0.11, 0.3, 0, 1.52, 0, 0x6b6256, 14);
+      mb.sphere(0.075, 0, 1.45, 0, 0xffe0a8, 10);
+      mb.cyl(0.13, 0.03, 0, 1.68, 0, 0x4a443c, 14);
     } },
     plant: { fw: 1, fh: 1, build(mb, rng) {
       mb.cyl(0.22, 0.35, 0, 0.18, 0, 0x5a4030, 10);
@@ -236,6 +259,22 @@
       mb.box(1.75, 0.08, 0.75, 0, 1.0, 0, 0x14120f);
       for (let i = 0; i < 12; i++) mb.box(0.11, 0.05, 0.3, -0.7 + i * 0.13, 0.78, 0.32, 0xd9d5c9);
     } }
+  };
+
+  /* Реальные габариты мебели: [ширина, глубина, высота верха] в метрах.
+     Нужны для точной коллизии и для того, чтобы предметы не висели в воздухе. */
+  const PROP_SIZE = {
+    bed: [1.95, 2.65, 0.79], nightstand: [0.95, 0.7, 0.78], wardrobe: [1.65, 0.85, 2.45],
+    dresser: [1.7, 0.7, 1.02], bookshelf: [1.55, 0.55, 2.2], table: [1.75, 1.55, 0.82],
+    chair: [0.62, 0.62, 0.5], sofa: [2.35, 1.0, 0.62], armchair: [0.95, 0.9, 0.56],
+    tv: [1.4, 0.55, 1.5], fridge: [0.9, 0.8, 1.98], counter: [2.72, 0.76, 0.93],
+    stove: [0.96, 0.8, 0.96], sink: [0.8, 0.6, 0.95], bathtub: [1.9, 1.0, 0.62],
+    toilet: [0.5, 0.66, 0.52], crib: [1.3, 1.95, 0.62], desk: [1.55, 0.82, 0.83],
+    crate: [0.9, 0.9, 0.83], barrel: [0.92, 0.92, 1.1], locker: [0.9, 0.62, 2.02],
+    shelfunit: [1.36, 0.66, 1.5], toolbox: [0.75, 0.46, 0.38], generator: [1.85, 1.26, 1.2],
+    cage: [2.0, 0.4, 2.4], jars: [1.45, 0.56, 1.2], paperstack: [0.4, 0.3, 0.12],
+    pipes: [1.2, 0.5, 3.0], rug: [2.4, 3.0, 0.05], lamp: [0.45, 0.45, 1.78],
+    plant: [0.5, 0.5, 0.62], piano: [1.8, 0.85, 1.05]
   };
 
   /* --------------------------- планировки --------------------------- */
@@ -315,9 +354,9 @@
   };
 
   const PALETTE = {
-    wood: [0x6b5236, 0x5a4530, 0x74593a],
-    tile: [0x6a6a63, 0x5c5c56, 0x76766e],
-    concrete: [0x4a4a46, 0x43433f, 0x51514c]
+    wood: [0x9d7f56, 0x8b6f4b, 0xab8c60],
+    tile: [0x9a9a92, 0x8b8b84, 0xa6a69d],
+    concrete: [0x74746e, 0x686862, 0x7e7e77]
   };
 
   /* ==================================================================== */
@@ -345,6 +384,9 @@
       this.lights = [];
       this.props = [];
       this.interactables = [];
+      /* точные прямоугольники мебели (в метрах) — игрок сталкивается с ними,
+         а не с целыми клетками 2.4 x 2.4 м */
+      this.propBoxes = [];
 
       this.stairs = { gx: 4, gy: 30, cols: [4, 5] };
       this.playerSpawn = { x: 0, y: 0, z: 0, yaw: 0 };
@@ -364,6 +406,35 @@
     gridToWorldX(gx) { return (gx + 0.5) * CELL; }
     gridToWorldZ(gy) { return (gy + 0.5) * CELL; }
     worldToGrid(x, z) { return { gx: this.toGridX(x), gy: this.toGridY(z) }; }
+    cellMinX(gx) { return gx * CELL; }
+    cellMinZ(gy) { return gy * CELL; }
+    inGrid(gx, gy) { return gx >= 0 && gy >= 0 && gx < GRID_W && gy < GRID_H; }
+
+    /* Блокирует ли клетка игрока: стена или ЗАКРЫТАЯ дверь.
+       Клетки мебели сюда не входят — у мебели свои прямоугольники. */
+    blocksPlayerCell(gx, gy) {
+      if (!this.inGrid(gx, gy)) return true;
+      const i = this.idx(gx, gy);
+      const t = this.type[i];
+      if (t === T.STAIR) return false;
+      /* дверь решает по своему состоянию, а не по флагу solid */
+      if (t === T.DOOR || this._doorMap[i]) {
+        const d = this._doorMap[i];
+        return !(d && d.open);
+      }
+      return this.solid[i] === 1;
+    }
+
+    /* Прямоугольник мебели для точной коллизии игрока */
+    addPropBox(wx, wz, fy, w, d, rot) {
+      const swap = Math.abs(Math.sin(rot || 0)) > 0.5;
+      const hw = (swap ? d : w) / 2, hd = (swap ? w : d) / 2;
+      this.propBoxes.push({
+        minX: wx - hw, maxX: wx + hw,
+        minZ: wz - hd, maxZ: wz + hd,
+        y: fy, top: fy + 2.4
+      });
+    }
     doorAt(gx, gy) {
       if (gx < 0 || gy < 0 || gx >= GRID_W || gy >= GRID_H) return null;
       const t = this.type[this.idx(gx, gy)];
@@ -373,7 +444,7 @@
     solidAtWorld(x, z) {
       const gx = this.toGridX(x), gy = this.toGridY(z);
       if (gx < 0 || gy < 0 || gx >= GRID_W || gy >= GRID_H) return true;
-      return this.solid[this.idx(gx, gy)] === 1;
+      return this.blocksPlayerCell(gx, gy);
     }
     floorAt(x, z) {
       const gx = this.toGridX(x), gy = this.toGridY(z);
@@ -442,8 +513,8 @@
       /* --- уборка «дыр» между этажами --- */
       this._sealLevels();
 
-      this._doorMap = this._doorMap || {};
-      for (const d of this.doors) this._doorMap[this.idx(d.gx, d.gy)] = d;
+      /* --- проверка дверей: убираем замурованные и считаем ось прохода --- */
+      this._validateDoors();
 
       return this;
     }
@@ -594,39 +665,76 @@
     }
 
     /* Поиск мест, где коридор входит в комнату → двери */
+    /* Двери ставим только в настоящих проёмах: узкий перешеек, где проход есть
+       с двух сторон по одной оси и стены — по другой. Одна сторона должна быть
+       комнатой, другая — коридором, иначе длинные коридоры зарастают дверями. */
     _detectDoors() {
+      /* старые двери убираем, чтобы повторный вызов был безопасным */
+      for (const d of this.doors) {
+        const i = this.idx(d.gx, d.gy);
+        if (this.type[i] === T.DOOR) { this.type[i] = T.FLOOR; this.solid[i] = 0; }
+      }
       this.doors = [];
       this._doorMap = {};
+
+      const isFloor = (gx, gy) => {
+        if (!this.inGrid(gx, gy)) return false;
+        const t = this.type[this.idx(gx, gy)];
+        return t === T.FLOOR || t === T.STAIR;
+      };
+      const isWall = (gx, gy) => {
+        if (!this.inGrid(gx, gy)) return true;
+        const t = this.type[this.idx(gx, gy)];
+        return t === T.WALL || t === T.VOID;
+      };
+      const isRoom = (gx, gy) => {
+        if (!this.inGrid(gx, gy)) return false;
+        return this.roomId[this.idx(gx, gy)] >= 0 && isFloor(gx, gy);
+      };
+
       const cands = [];
       for (let gy = 1; gy < GRID_H - 1; gy++) {
         for (let gx = 1; gx < GRID_W - 1; gx++) {
           const i = this.idx(gx, gy);
           if (this.type[i] !== T.FLOOR) continue;
-          if (this.roomId[i] >= 0) continue;       // это комната
+          if (this.roomId[i] >= 0) continue;        // это пол комнаты, не проём
           if (this.roomId[i] === -4) continue;      // площадка лестницы
-          let touch = -1;
-          const nb = [[gx + 1, gy], [gx - 1, gy], [gx, gy + 1], [gx, gy - 1]];
-          for (const [nx, ny] of nb) {
-            const j = this.idx(nx, ny);
-            if (this.roomId[j] >= 0 && this.type[j] === T.FLOOR) { touch = this.roomId[j]; break; }
-          }
-          if (touch >= 0) cands.push({ gx, gy, touch });
+          if (this.floorY[i] < -1.5) continue;      // подвал — без дверей, там решётки
+
+          const e = isFloor(gx + 1, gy), w = isFloor(gx - 1, gy);
+          const so = isFloor(gx, gy + 1), n = isFloor(gx, gy - 1);
+
+          let axis = null;
+          if (e && w && isWall(gx, gy + 1) && isWall(gx, gy - 1)) axis = 'x';
+          else if (so && n && isWall(gx + 1, gy) && isWall(gx - 1, gy)) axis = 'z';
+          if (!axis) continue;
+
+          /* ровно одна сторона — комната, вторая — коридор */
+          const roomE = isRoom(gx + 1, gy), roomW = isRoom(gx - 1, gy);
+          const roomS = isRoom(gx, gy + 1), roomN = isRoom(gx, gy - 1);
+          const roomsA = axis === 'x' ? [roomE, roomW] : [roomS, roomN];
+          if (roomsA[0] === roomsA[1]) continue;
+
+          cands.push({ gx, gy, axis });
         }
       }
-      /* убираем соседние дубликаты, оставляя одну дверь */
+
+      /* двери не должны стоять вплотную друг к другу */
       const used = new Set();
       for (const c of cands) {
         const key = this.idx(c.gx, c.gy);
-        if (used.has(key)) { this.type[key] = T.WALL; this.solid[key] = 1; continue; }
         let dup = false;
         for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
           if (used.has(this.idx(c.gx + dx, c.gy + dy))) { dup = true; break; }
         }
-        if (dup) { this.type[key] = T.WALL; this.solid[key] = 1; continue; }
+        if (dup) continue;
         used.add(key);
+
         this.type[key] = T.DOOR;
+        this.solid[key] = 0;
         const door = {
           gx: c.gx, gy: c.gy, open: false, angle: 0, type: 'normal', locked: false,
+          axis: c.axis, horizontal: c.axis === 'z',
           x: this.gridToWorldX(c.gx), y: this.floorY[key], z: this.gridToWorldZ(c.gy)
         };
         this._doorMap[key] = door;
@@ -740,9 +848,13 @@
     build(scene) {
       const mbStatic = new MB();
       const mbWalls = new MB();
-      const mbFloor = new MB();
+      const mbFloor = new MB();       // деревянный пол
+      const mbFloorTile = new MB();   // плитка (ванная, кухня)
+      const mbFloorBase = new MB();   // бетон подвала
+      const mbTrim = new MB();        // плинтусы и наличники
+      const mbCeil = new MB();        // потолки — штукатурка, не доски
 
-      const wallColMain = 0x6d6355, wallColBase = 0x4b4a45;
+      const wallColMain = 0x8d8072, wallColBase = 0x62615a;
       const floorColsMain = PALETTE.wood, floorColsBase = PALETTE.concrete;
 
       for (let gy = 0; gy < GRID_H; gy++) {
@@ -755,12 +867,33 @@
           const floorLike = (t === T.FLOOR || t === T.DOOR || t === T.STAIR || t === T.LOCKED);
 
           if (floorLike) {
-            const pal = isBase ? floorColsBase : (this._tileRoom(gx, gy) === 'bathroom' ? PALETTE.tile : floorColsMain);
+            const roomType = this._tileRoom(gx, gy);
+            const isTile = !isBase && (roomType === 'bathroom' || roomType === 'kitchen' || roomType === 'laundry');
+            const target = isBase ? mbFloorBase : (isTile ? mbFloorTile : mbFloor);
+            const pal = isBase ? floorColsBase : (isTile ? PALETTE.tile : floorColsMain);
             const base = pal[(gx * 7 + gy * 13) % pal.length];
             const tint = 0.84 + ((gx * 53 + gy * 29) % 100) / 100 * 0.3;
             const c = new THREE.Color(base).multiplyScalar(tint);
-            mbFloor.plane(CELL, CELL, wx, fy, wz, c, 0, -Math.PI / 2);
-            if (cy > fy + 0.5) mbFloor.plane(CELL, CELL, wx, cy, wz, isBase ? 0x2a2a27 : 0x35302a, 0, Math.PI / 2);
+            target.plane(CELL, CELL, wx, fy, wz, c, 0, -Math.PI / 2);
+            if (cy > fy + 0.5) {
+              const cCeil = isBase ? 0x53514a : 0x8a8478;
+              mbCeil.plane(CELL, CELL, wx, cy, wz, cCeil, 0, Math.PI / 2);
+            }
+
+            /* плинтус вдоль стен — дом перестаёт выглядеть «коробкой» */
+            for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+              const nx = gx + dx, ny = gy + dy;
+              if (nx < 0 || ny < 0 || nx >= GRID_W || ny >= GRID_H) continue;
+              const j = this.idx(nx, ny);
+              const tt = this.type[j];
+              if (tt !== T.WALL && tt !== T.VOID) continue;
+              const cTrim = isBase ? 0x4a453c : 0x3e3327;
+              if (dx !== 0) {
+                mbTrim.box(0.07, 0.17, CELL, wx + dx * (CELL / 2 - 0.035), fy + 0.085, wz, cTrim);
+              } else {
+                mbTrim.box(CELL, 0.17, 0.07, wx, fy + 0.085, wz + dy * (CELL / 2 - 0.035), cTrim);
+              }
+            }
             continue;
           }
 
@@ -788,8 +921,8 @@
           const col = new THREE.Color(base).multiplyScalar(tint);
           mbWalls.box(CELL, h, CELL, wx, bottom + h / 2, wz, col);
           /* потолок над сплошной клеткой, чтобы дом был закрытым */
-          if (gy >= BASE_ROWS[0]) mbFloor.plane(CELL, CELL, wx, 0, wz, 0x2a2a27, 0, Math.PI / 2);
-          else if (gy <= MAIN_ROWS[1]) mbFloor.plane(CELL, CELL, wx, MAIN_CEIL, wz, 0x35302a, 0, Math.PI / 2);
+          if (gy >= BASE_ROWS[0]) mbCeil.plane(CELL, CELL, wx, 0, wz, 0x3a3730, 0, Math.PI / 2);
+          else if (gy <= MAIN_ROWS[1]) mbCeil.plane(CELL, CELL, wx, MAIN_CEIL, wz, 0x6d675c, 0, Math.PI / 2);
         }
       }
 
@@ -819,19 +952,56 @@
       /* предметы */
       this._placeProps(mbStatic, mbWalls);
 
+      /* картины, балки, мелочь на стенах */
+      this._buildDecor(mbStatic, mbTrim);
+
       /* двери */
       this._buildDoors();
 
-      /* материалы */
-      const matStatic = new THREE.MeshLambertMaterial({ vertexColors: true });
-      const matWalls = new THREE.MeshLambertMaterial({ vertexColors: true });
-      const matFloor = new THREE.MeshLambertMaterial({ vertexColors: true });
-      const matWin = new THREE.MeshLambertMaterial({ vertexColors: true });
+      /* материалы: процедурные текстуры + вершинные цвета */
+      const TX = global.HG.Textures;
+      const tex = (n) => (TX ? TX.get(n) : null);
+      const bump = (n, k) => {
+        const t = tex(n);
+        if (!t) return null;
+        t.wrapS = t.wrapT = THREE.RepeatWrapping;
+        return t;
+      };
+      const matStatic = new THREE.MeshPhongMaterial({
+        vertexColors: true, map: tex('wood'), bumpMap: bump('wood'), bumpScale: 0.025,
+        shininess: 8, specular: 0x1a1a18
+      });
+      const matWalls = new THREE.MeshPhongMaterial({
+        vertexColors: true, map: tex('wallpaper'), bumpMap: bump('plaster'), bumpScale: 0.012,
+        shininess: 2, specular: 0x0a0a0a
+      });
+      const matFloor = new THREE.MeshPhongMaterial({
+        vertexColors: true, map: tex('planks'), bumpMap: null, bumpScale: 0,
+        shininess: 10, specular: 0x151310
+      });
+      const matFloorTile = new THREE.MeshPhongMaterial({
+        vertexColors: true, map: tex('tiles'), bumpMap: null, bumpScale: 0,
+        shininess: 34, specular: 0x2a2a2a
+      });
+      const matFloorBase = new THREE.MeshPhongMaterial({
+        vertexColors: true, map: tex('concrete'), bumpMap: null, bumpScale: 0,
+        shininess: 4, specular: 0x101010
+      });
+      const matTrim = new THREE.MeshPhongMaterial({ vertexColors: true, map: tex('wood'), shininess: 12 });
+      const matCeil = new THREE.MeshPhongMaterial({
+        vertexColors: true, map: tex('plaster'), bumpMap: null, bumpScale: 0,
+        shininess: 1, specular: 0x080808
+      });
+      const matWin = new THREE.MeshPhongMaterial({ vertexColors: true, shininess: 40, specular: 0x333333 });
 
       const meshes = [];
       const mStatic = mbStatic.build(matStatic); if (mStatic) { this.group.add(mStatic); meshes.push(mStatic); }
       const mWalls = mbWalls.build(matWalls); if (mWalls) { this.group.add(mWalls); meshes.push(mWalls); }
       const mFloor = mbFloor.build(matFloor, { shadows: false }); if (mFloor) { this.group.add(mFloor); meshes.push(mFloor); }
+      const mFloorTile = mbFloorTile.build(matFloorTile, { shadows: false }); if (mFloorTile) { this.group.add(mFloorTile); meshes.push(mFloorTile); }
+      const mFloorBase = mbFloorBase.build(matFloorBase, { shadows: false }); if (mFloorBase) { this.group.add(mFloorBase); meshes.push(mFloorBase); }
+      const mTrim = mbTrim.build(matTrim, { shadows: false }); if (mTrim) { this.group.add(mTrim); meshes.push(mTrim); }
+      const mCeil = mbCeil.build(matCeil, { shadows: false }); if (mCeil) { this.group.add(mCeil); meshes.push(mCeil); }
       const mWin = mbWin.build(matWin); if (mWin) { this.group.add(mWin); meshes.push(mWin); }
 
       scene.add(this.group);
@@ -845,13 +1015,30 @@
       /* --- выход --- */
       this._buildExit();
 
-      /* --- точка старта --- */
+      /* --- точка старта: центр холла, но не внутри мебели --- */
       const f = this.foyer;
-      const sx = this.gridToWorldX(f.ix + Math.floor(f.iw / 2));
-      const sz = this.gridToWorldZ(f.iy + Math.floor(f.ih / 2));
-      this.playerSpawn = { x: sx, y: 0, z: sz, yaw: 0 };
-      /* лицом к выходу */
-      this.playerSpawn.yaw = Math.atan2(-sx, -sz) + Math.PI;
+      const cx = f.ix + Math.floor(f.iw / 2);
+      const cy = f.iy + Math.floor(f.ih / 2);
+      const inBox = (x, z) => this.propBoxes.some(b =>
+        x > b.minX - 0.45 && x < b.maxX + 0.45 && z > b.minZ - 0.45 && z < b.maxZ + 0.45);
+      let best = null, bestD = Infinity;
+      for (let gy = f.iy; gy < f.iy + f.ih; gy++) {
+        for (let gx = f.ix; gx < f.ix + f.iw; gx++) {
+          const i = this.idx(gx, gy);
+          if (this.type[i] !== T.FLOOR || this.blocked[i]) continue;
+          const x = this.gridToWorldX(gx), z = this.gridToWorldZ(gy);
+          if (inBox(x, z)) continue;
+          const d = Math.abs(gx - cx) + Math.abs(gy - cy);
+          if (d < bestD) { bestD = d; best = { x, z }; }
+        }
+      }
+      if (!best) best = { x: this.gridToWorldX(cx), z: this.gridToWorldZ(cy) };
+      const sx = best.x, sz = best.z;
+      this.playerSpawn = { x: sx, y: this.floorAt(sx, sz), z: sz, yaw: 0 };
+      /* лицом к выходной двери */
+      if (this.exit) {
+        this.playerSpawn.yaw = Math.atan2(-(this.exit.x - sx), -(this.exit.z - sz));
+      }
 
       return this;
     }
@@ -859,6 +1046,62 @@
     _tileRoom(gx, gy) {
       const id = this.roomId[this.idx(gx, gy)];
       return id >= 0 ? this.rooms[id].type : '';
+    }
+
+    /* Картины, балки, часы — маленькие детали, из которых складывается дом */
+    _buildDecor(mbStatic, mbTrim) {
+      const rng = this.rng;
+
+      for (const room of this.rooms) {
+        if (room.level !== 'main') continue;
+        if (room.iw < 3 || room.ih < 3) continue;
+        const ceil = MAIN_CEIL;
+
+        /* балки под потолком в «богатых» комнатах */
+        if (['living', 'library', 'dining', 'study', 'foyer'].includes(room.type) && rng() < 0.75) {
+          const horiz = rng() < 0.5;
+          if (horiz) {
+            for (let gy = room.iy; gy < room.iy + room.ih; gy += 3) {
+              const wz = this.gridToWorldZ(gy);
+              const cx = this.gridToWorldX(room.ix + room.iw / 2);
+              mbTrim.box(room.iw * CELL - 0.2, 0.16, 0.22, cx, ceil - 0.1, wz, 0x3a2c1f);
+            }
+          } else {
+            for (let gx = room.ix; gx < room.ix + room.iw; gx += 3) {
+              const wx = this.gridToWorldX(gx);
+              const cz = this.gridToWorldZ(room.iy + room.ih / 2);
+              mbTrim.box(0.22, 0.16, room.ih * CELL - 0.2, wx, ceil - 0.1, cz, 0x3a2c1f);
+            }
+          }
+        }
+
+        /* картины по стенам */
+        let placed = 0;
+        for (let gy = room.iy; gy < room.iy + room.ih && placed < 2; gy++) {
+          for (let gx = room.ix; gx < room.ix + room.iw && placed < 2; gx++) {
+            const i = this.idx(gx, gy);
+            if (this.type[i] !== T.FLOOR) continue;
+            for (const [dx, dy] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) {
+              const nx = gx + dx, ny = gy + dy;
+              if (!this.inGrid(nx, ny)) continue;
+              if (this.type[this.idx(nx, ny)] !== T.WALL) continue;
+              if (rng() > 0.18) continue;
+              const wx = this.gridToWorldX(gx) + dx * (CELL / 2 - 0.035);
+              const wz = this.gridToWorldZ(gy) + dy * (CELL / 2 - 0.035);
+              const rot = dx !== 0 ? Math.PI / 2 : 0;
+              const w = 0.72 + rng() * 0.4, h = 0.55 + rng() * 0.5;
+              const y = 1.55 + rng() * 0.25;
+              mbStatic.push(wx, y, wz, rot);
+              mbStatic.box(w + 0.1, h + 0.1, 0.05, 0, 0, 0, 0x2f2418);
+              mbStatic.box(w, h, 0.02, 0, 0, 0.035, [0x4a3a2c, 0x3c3428, 0x54402f][placed % 3]);
+              mbStatic.box(w * 0.55, h * 0.4, 0.01, 0, h * 0.12, 0.05, 0x241d15);
+              mbStatic.pop();
+              placed++;
+              break;
+            }
+          }
+        }
+      }
     }
 
     _placeProps(mb, mbWalls) {
@@ -883,6 +1126,10 @@
           const wx = this.gridToWorldX(gx) + (fw - 1) * CELL / 2;
           const wz = this.gridToWorldZ(gy) + (fh - 1) * CELL / 2;
           const fy = this.floorY[this.idx(gx, gy)];
+
+          /* точный прямоугольник коллизии — ровно по видимой модели */
+          const size = PROP_SIZE[item.k];
+          if (size && !def.noBlock) this.addPropBox(wx, wz, fy, size[0], size[1], rot);
 
           if (def.special === 'generator') {
             this._makeGenerator(wx, fy, wz, rot, gx, gy);
@@ -1030,21 +1277,66 @@
       for (let y = gy; y < gy + 2; y++) for (let x = gx; x < gx + 2; x++) this.blocked[this.idx(x, y)] = 1;
     }
 
+    /* Дверь должна стоять в реальном проёме: если клетку заделали стеной или
+       прохода нет — двери здесь не место. Заодно вычисляем ось прохода. */
+    _validateDoors() {
+      const walk = (gx, gy) => {
+        if (!this.inGrid(gx, gy)) return false;
+        const i = this.idx(gx, gy);
+        if (this.type[i] === T.DOOR) return true;
+        return (this.type[i] === T.FLOOR || this.type[i] === T.STAIR) && this.solid[i] === 0;
+      };
+      const keep = [];
+      for (const d of this.doors) {
+        const i = this.idx(d.gx, d.gy);
+        if (this.type[i] !== T.DOOR) continue;          // замурована — выкидываем
+
+        const wE = walk(d.gx + 1, d.gy), wW = walk(d.gx - 1, d.gy);
+        const wS = walk(d.gx, d.gy + 1), wN = walk(d.gx, d.gy - 1);
+        const ax = wE || wW, az = wS || wN;
+
+        /* дверь имеет смысл только когда проход есть с ОБЕИХ сторон */
+        const canX = wE && wW, canZ = wS && wN;
+        let axis = null;
+        if (canX && !canZ) axis = 'x';
+        else if (canZ && !canX) axis = 'z';
+        /* перекрёсток или тупик: дверь только мешала бы — делаем открытый проём */
+        if (!axis) { this.type[i] = T.FLOOR; this.solid[i] = 0; continue; }
+
+        this.solid[i] = 0;                              // проходима, когда открыта
+        d.axis = axis;
+        d.horizontal = axis === 'z';
+        keep.push(d);
+      }
+      this.doors = keep;
+      this._doorMap = {};
+      for (const d of keep) this._doorMap[this.idx(d.gx, d.gy)] = d;
+      /* мусорная карта от старых прогонов не должна оставаться */
+      for (const k in this._doorMap) {
+        if (!keep.includes(this._doorMap[k])) delete this._doorMap[k];
+      }
+    }
+
     _buildDoors() {
       const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
       const list = Object.values(this._doorMap || {});
       for (const d of list) {
         const fy = this.floorY[this.idx(d.gx, d.gy)];
         const wx = this.gridToWorldX(d.gx), wz = this.gridToWorldZ(d.gy);
-        const horiz = this._isHorizontalDoor(d.gx, d.gy);
+        /* полотно должно быть перпендикулярно проходу:
+           проход по Z -> полотно вдоль X (rotation 0),
+           проход по X -> полотно вдоль Z (rotation PI/2) */
+        const axis = d.axis || 'z';
         const group = new THREE.Group();
         group.position.set(wx, fy, wz);
-        group.rotation.y = horiz ? 0 : Math.PI / 2;
+        group.rotation.y = axis === 'x' ? Math.PI / 2 : 0;
         const mb = new MB();
         mb.box(2.3, 2.15, 0.12, 0, 1.07, 0, 0x4a3524);
-        mb.box(2.05, 1.0, 0.03, 0, 1.5, 0.08, 0x5b4230);
-        mb.box(2.05, 0.7, 0.03, 0, 0.55, 0.08, 0x5b4230);
-        mb.sphere(0.06, 0.85, 1.05, 0.1, 0xc0a86c, 8);
+        mb.box(2.08, 1.02, 0.035, 0, 1.52, 0.08, 0x59422b);
+        mb.box(2.08, 0.72, 0.035, 0, 0.56, 0.08, 0x59422b);
+        mb.box(2.14, 0.1, 0.05, 0, 2.1, 0.06, 0x4a3623);
+        mb.sphere(0.075, 0.86, 1.06, 0.13, 0xd8bc7a, 10);
+        mb.cyl(0.028, 0.16, 0.86, 1.06, 0.2, 0xb99a5c, 8);
         const doorMesh = mb.build(mat);
         const pivot = new THREE.Group();
         pivot.position.set(-1.1, 0, 0);
@@ -1052,19 +1344,20 @@
         group.add(pivot);
         /* косяк */
         const fb = new MB();
-        fb.box(0.12, 2.3, 0.3, -1.16, 1.15, 0, 0x33281d);
-        fb.box(0.12, 2.3, 0.3, 1.16, 1.15, 0, 0x33281d);
-        fb.box(2.45, 0.14, 0.3, 0, 2.28, 0, 0x33281d);
+        fb.box(0.14, 2.34, 0.28, -1.16, 1.17, 0, 0x4a3826);
+        fb.box(0.14, 2.34, 0.28, 1.16, 1.17, 0, 0x4a3826);
+        fb.box(2.42, 0.18, 0.28, 0, 2.32, 0, 0x4a3826);
+        fb.box(2.42, 0.1, 0.28, 0, 0.05, 0, 0x33261a);
         const frame = fb.build(mat);
         if (frame) group.add(frame);
         this.group.add(group);
-        d.mesh = group; d.pivot = pivot; d.horizontal = horiz;
+        d.mesh = group; d.pivot = pivot; d.horizontal = axis === 'z'; d.axis = axis;
         d.baseAngle = 0;
         d.x = wx; d.y = fy; d.z = wz;
         if (!this.doors.includes(d)) this.doors.push(d);
         /* дверь можно открыть/закрыть — это шумит */
         this.interactables.push({
-          x: wx, y: fy + 1.05, z: wz, radius: 1.9, obj: d, type: 'door',
+          x: wx, y: fy + 1.15, z: wz, radius: 2.7, obj: d, type: 'door',
           label: () => d.open ? 'Закрыть дверь' : 'Открыть дверь'
         });
       }
@@ -1194,26 +1487,56 @@
     _looseSpots(count) {
       const spots = [];
       const candidates = [];
+
+      /* 1) низкая мебель: столы, тумбы, ящики — предмет лежит на поверхности */
       for (const p of this.props) {
-        if (!p.def || !p.def.build) continue;
-        if (p.def.container || p.def.hide) continue;
-        candidates.push(p);
+        const size = PROP_SIZE[p.kind];
+        if (!size) continue;
+        if (p.def && (p.def.container || p.def.hide)) continue;  // не кладём на шкафы и ящики
+        const top = size[2];
+        if (top > 1.15 || top < 0.3) continue;
+        candidates.push({ x: p.x, y: p.y + top + 0.03, z: p.z });
       }
       U.shuffle(candidates, this.rng);
-      for (const p of candidates) {
+      for (const c of candidates) {
         if (spots.length >= count) break;
-        const h = p.def.fh > p.def.fw ? 0.85 : 0.85;
-        spots.push({ x: p.x, y: p.y + h, z: p.z });
+        spots.push(c);
       }
-      /* если мебели мало — берём пол в комнатах */
+
+      /* 2) пол в комнатах — свободные клетки, не у стен и не у дверей */
+      const free = [];
+      for (const room of this.rooms) {
+        if (room.iw < 2 || room.ih < 2) continue;
+        for (let gy = room.iy; gy < room.iy + room.ih; gy++) {
+          for (let gx = room.ix; gx < room.ix + room.iw; gx++) {
+            const i = this.idx(gx, gy);
+            if (this.type[i] !== T.FLOOR || this.blocked[i]) continue;
+            let ok = true;
+            for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+              const j = this.idx(gx + dx, gy + dy);
+              if (this.type[j] !== T.FLOOR) { ok = false; break; }
+            }
+            if (!ok) continue;
+            free.push({ x: this.gridToWorldX(gx), y: this.floorY[i] + 0.03, z: this.gridToWorldZ(gy) });
+          }
+        }
+      }
+      U.shuffle(free, this.rng);
+      for (const f of free) {
+        if (spots.length >= count) break;
+        /* не складываем всё в одну кучу */
+        if (spots.some(sp => Math.hypot(sp.x - f.x, sp.z - f.z) < 1.6)) continue;
+        spots.push(f);
+      }
+
+      /* 3) подстраховка: любой свободный пол */
       let guard = 0;
-      while (spots.length < count && guard++ < 200) {
-        const room = this.rooms[Math.floor(this.rng() * this.rooms.length)];
-        const gx = room.ix + Math.floor(this.rng() * room.iw);
-        const gy = room.iy + Math.floor(this.rng() * room.ih);
+      while (spots.length < count && guard++ < 400) {
+        const gx = 1 + Math.floor(this.rng() * (GRID_W - 2));
+        const gy = 1 + Math.floor(this.rng() * (GRID_H - 2));
         const i = this.idx(gx, gy);
         if (this.type[i] !== T.FLOOR || this.blocked[i]) continue;
-        spots.push({ x: this.gridToWorldX(gx), y: this.floorY[i] + 0.05, z: this.gridToWorldZ(gy) });
+        spots.push({ x: this.gridToWorldX(gx), y: this.floorY[i] + 0.03, z: this.gridToWorldZ(gy) });
       }
       return spots;
     }
@@ -1248,8 +1571,15 @@
       mesh.position.set(x, y, z);
       mesh.castShadow = false;
       this.group.add(mesh);
-      const glow = new THREE.PointLight(0xffe0a0, 2.2, 3.0, 1.8);
-      glow.position.set(x, y + 0.2, z);
+      /* мягкий ореол вместо точечного света: 13 источников на сцене — это дорого */
+      const glow = new THREE.Mesh(
+        new THREE.SphereGeometry(0.26, 8, 6),
+        new THREE.MeshBasicMaterial({
+          color: 0xffe0a0, transparent: true, opacity: 0.16,
+          blending: THREE.AdditiveBlending, depthWrite: false
+        })
+      );
+      glow.position.set(x, y + 0.12, z);
       this.group.add(glow);
       const item = {
         type, x, y, z, mesh, glow, taken: false, data: data || {},
@@ -1257,7 +1587,7 @@
         bobPhase: this.rng() * 6.28
       };
       this.interactables.push({
-        x, y: y + 0.06, z, radius: 1.7, obj: item, type: 'item',
+        x, y: y + 0.06, z, radius: 2.35, obj: item, type: 'item',
         label: () => 'Взять: ' + item.name
       });
       return item;
@@ -1366,21 +1696,54 @@
 
     /* Ближайший интерактивный объект — по экранной проекции (наведи прицел) */
     findInteractable(camera) {
-      let best = null, bestScore = -Infinity;
+      const camPos = camera.position;
+      const dir = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
       const v = new THREE.Vector3();
+      let best = null, bestScore = -Infinity;
+
       for (const it of this.interactables) {
         if (it.hidden) continue;
-        v.set(it.x, it.y, it.z);
-        const dist = v.distanceTo(camera.position);
-        if (dist > it.radius) continue;
-        v.project(camera);
-        if (v.z > 1 || v.z < -1) continue;       // объект за камерой или слишком далеко по Z
-        const dx = Math.abs(v.x), dy = Math.abs(v.y);
-        if (dx > 0.34 || dy > 0.34) continue;    // не в прицеле
-        const score = (1 - dx - dy) * 2 - dist * 0.15;
+        if (it.obj && it.obj.taken) continue;
+        const dx = it.x - camPos.x, dy = it.y - camPos.y, dz = it.z - camPos.z;
+        const dist = Math.hypot(dx, dy, dz);
+        if (dist > (it.radius || 2.0)) continue;
+
+        const dot = dist > 0.0001 ? (dx * dir.x + dy * dir.y + dz * dir.z) / dist : 1;
+
+        /* экранная проекция — надёжнее для мелких предметов */
+        v.set(it.x, it.y, it.z).project(camera);
+        const projected = v.z > -1 && v.z < 1 && Math.abs(v.x) < 0.55 && Math.abs(v.y) < 0.55;
+
+        /* чем ближе объект, тем шире угол: в упор целиться не нужно */
+        const minDot = dist < 1.1 ? -1 : (dist < 1.9 ? 0.45 : 0.82);
+        if (!projected && dot < minDot) continue;
+
+        /* не хватаем предметы сквозь стену (клетка самой цели не мешает) */
+        const tgtIdx = this.idx(this.toGridX(it.x), this.toGridY(it.z));
+        if (dist > 1.1 && !this.clearSight(camPos.x, camPos.z, it.x, it.z, tgtIdx)) continue;
+
+        const score = dot * 2.2 + (projected ? 0.5 : 0) - dist * 0.22;
         if (score > bestScore) { bestScore = score; best = it; }
       }
       return best;
+    }
+
+    /* Нет ли стены между двумя точками (грубый DDA по сетке).
+       ignoreIdx — клетка самой цели: дверь не должна перекрывать саму себя. */
+    clearSight(ax, az, bx, bz, ignoreIdx) {
+      const dist = Math.hypot(bx - ax, bz - az);
+      const steps = Math.max(2, Math.ceil(dist / 0.3));
+      for (let i = 1; i < steps; i++) {
+        const t = i / steps;
+        const gx = this.toGridX(ax + (bx - ax) * t);
+        const gy = this.toGridY(az + (bz - az) * t);
+        if (!this.inGrid(gx, gy)) return false;
+        const idx = this.idx(gx, gy);
+        if (idx === ignoreIdx) continue;
+        /* закрытая дверь не мешает «увидеть» саму дверь и всё, что за ней вплотную */
+        if (this.solid[idx] === 1 && this.type[idx] !== T.DOOR) return false;
+      }
+      return true;
     }
   }
 

@@ -26,6 +26,8 @@
       this.idx = [];
       this.stack = [];
       this.t = { x: 0, y: 0, z: 0, ry: 0, rx: 0, rz: 0, s: 1 };
+      /* мировой масштаб UV: одна плитка текстуры на 1.2 м */
+      this.uvScale = 1 / 2.6;
     }
 
     push(x = 0, y = 0, z = 0, ry = 0, rx = 0, rz = 0, s = 1) {
@@ -73,13 +75,26 @@
         if (ry) { const nx = vx * cry + vz * sry, nz = -vx * sry + vz * cry; vx = nx; vz = nz; }
         const p = this._xf(vx + x, vy + y, vz + z);
         this.pos.push(p[0], p[1], p[2]);
+        let nx = 0, ny = 1, nz = 0;
         if (nor) {
           const n = this._xf(nor.getX(i), nor.getY(i), nor.getZ(i));
           const len = Math.hypot(n[0], n[1], n[2]) || 1;
-          this.norm.push(n[0] / len, n[1] / len, n[2] / len);
-        } else this.norm.push(0, 1, 0);
-        if (uvs) this.uv.push(uvs.getX(i), uvs.getY(i));
-        else this.uv.push(0, 0);
+          nx = n[0] / len; ny = n[1] / len; nz = n[2] / len;
+        }
+        this.norm.push(nx, ny, nz);
+
+        /* UV считаем по мировой позиции (проекция на плоскость грани):
+           текстура ложится ровно, без растяжения на больших стенах */
+        if (uvs && this.uvMode === 'local') {
+          this.uv.push(uvs.getX(i), uvs.getY(i));
+        } else {
+          const ax = Math.abs(nx), ay = Math.abs(ny), az = Math.abs(nz);
+          let u, v;
+          if (ay >= ax && ay >= az) { u = p[0]; v = p[2]; }
+          else if (ax >= az) { u = p[2]; v = p[1]; }
+          else { u = p[0]; v = p[1]; }
+          this.uv.push(u * this.uvScale, v * this.uvScale);
+        }
         this.col.push(c.r, c.g, c.b);
       }
       if (g.index) {
